@@ -111,7 +111,7 @@
       })
 
       ipcRenderer.on("member_shout",(event, data)=>{
-        // {animalType, userName, socketId, keyWordList}
+        // {animalType, userName, socketId, keywordList}
          updateAnimalObject(data)
       })
 
@@ -301,8 +301,9 @@
         mFlgTransparent = !mFlgTransparent
       }
 
-      function startVideoChat(){
+      function startVideoChat(socketId){
         //ipc message
+        
       }
 
 
