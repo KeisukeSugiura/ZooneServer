@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>foreground</title>
+	<link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap.min.css">
+
+    <!-- Bootstrap Material Design -->
+    <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap-material-design.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/ripples.min.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/animate.min.css">
+
+    <!-- to keep the abilities of using Node.js and Electron APIs -->
+    <script>
+      window.nodeRequire = require
+      delete window.require
+      delete window.exports
+      delete window.module
+    </script>
+    
+    <script src="/javascripts/jquery.min.js"></script>
+    <script type="text/javascript" src="/javascripts/jquery.arctext.js"></script>
+</head>
+<body>
+    <style>
+      html {
+        background-color: rgba(0,0,0,0);
+        margin:0px 0px 0px 0px;
+        padding: 0px 0px 0px 0px;
+        width:100%;
+        height:100%;
+      }
+      body {
+        background-color: rgba(0,0,0,0);
+        margin:0px 0px 0px 0px;
+        padding: 0px 0px 0px 0px;
+        width:100%;
+        height:100%;
+      }
+      
+      /*cut in animation css*/
+      .cipic {
+        opacity: 0.0;
+      }
+      .cipic-middle {
+        opacity: 0.5;
+      }
+      .cipic-after {
+        opacity : 0.0;
+      }
+
+      /*animal shout animation*/
+      .animal {
+        opacity: 0.0;
+      }
+
+      .animal-middle {
+        opacity:0.5;
+      }
+
+      .animal-after {
+        opacity:0.0;
+      }
+    </style>
+    
+  
+
+     
+	 <!--
+        import javascript
+    -->
+
+    <!-- Twitter Bootstrap -->
+    <script src="/javascripts/bootstrap.min.js"></script>
+
+    <!-- Material Design for Bootstrap -->
+    <script src="/javascripts/material.js"></script>
+    <script src="/javascripts/ripples.min.js"></script>
+    <script>
+      $.material.init();
+
+      const {ipcRenderer, screen} = nodeRequire('electron')
+      const screenWidth = screen.getPrimaryDisplay().workAreaSize.width
+      const screenHeight = screen.getPrimaryDisplay().workAreaSize.height
+      // const screenWidth = 1000
+      // const screenHeight = 600
+
+      const animalArray = ["inu", "inu2", "chinpan", "lion", "manbou", "neko", "neko2", "niwatori", "pengin", "risu", "taka", "tiger", "tokage", "uzura", "yagi", "zou"]
+      const ANIMAL_OBJECT_WIDTH = 200
+      const ANIMAL_OBJECT_HEIGHT = 200
+      const ANIMAL_OBJECT_PADDING = 25
+      const ANIMAL_OBJECT_RADIUS = 90
+      const ANIMAL_OBJECT_TEXT_SIZE = 16
+      const ANIMAL_IMAGE_WIDTH = 150
+      const ANIMAL_IMAGE_HEIGHT = 150
+
+
+      var mAnimalObjects = new Map() //key:socketId, value:dom element
+      var mFlgTransparent = true
+
+
+
+      /*
+          ipcRenderer events
+       */
+
+      ipcRenderer.on("self_shout",(event, data)=>{
+        // animalType, 
+        
+        cutInAnimalImage(data.animalType)
+
+      })
+
+      ipcRenderer.on("member_shout",(event, data)=>{
+        // {animalType, userName, socketId, keyWordList}
+         updateAnimalObject(data)
+      })
+
+      ipcRenderer.on("change_transparent",(event,data)=>{
+        changeTransparent()
+      })
+
+
+
+      /*
+            methods
+       */
+
+      function cutInAnimalImage(animalType = getRandomAnimal()){
+
+        const img = document.createElement("img")
+        var count = 0
+        img.width = screenHeight
+        img.height = screenHeight
+        img.style.left = String((screenWidth - screenHeight)/2) + "px"
+        img.style.position = "fixed"
+        img.style.width = String(screenHeight) + "px"
+        img.style.height = String(screenHeight) + "px"
+        img.style.borderRadius = "50%"
+        img.classList.add("cipic")
+
+        img.onload = function(){
+          document.body.appendChild(img)
+          img.className = img.className + " cipic-middle rollIn animated"
+        }
+
+        img.addEventListener("animationend",(evt)=>{
+            count = count+1
+            if(count >1){
+              document.body.removeChild(img)
+            }
+            img.className = img.className + " cipic-after rollOut animated" 
+        })
+
+        img.src = "/images/" + animalType + ".png"
+      }
+
+      function getRandomAnimal(){
+        var rand = getRandomInt(0, animalArray.length-1)
+        return animalArray[rand]
+      }
+
+      function getRandomInt(min, max) {
+        return Math.floor( Math.random() * (max - min + 1) ) + min;
+      }
+
+      /*
+          flip animation for animal shout
+       */
+
+      var flipOutAnimation = function(){
+
+      }
+
+      function flipAnimationStart(element){
+        element.className = "animal-middle flipInY animated"
+
+        var flipInAnimation = function(evt){
+          element.removeEventListener("animationend",flipInAnimation)
+          element.className = "animal-middle tada animated"
+          setTimeout(flipOutAnimation, 3000)
+        }
+
+        var flipOutAnimation = function(){
+          element.className = "animal-after flipOutY animated"
+         // setTimeout(changeTransparent,2000)
+         // setTimeout(changeTransparent,4000)
+         // var aa = function(){
+         //      updateAnimalObject({userName:"keisukekeisuke",socketId:"aaaaaa",keywordList:["aaaa","bbbb","cccc"],animalType:"inu"})
+
+         // }
+         // setTimeout(aa,2000)
+
+        }
+
+        element.addEventListener("animationend",flipInAnimation)
+
+      }
+
+      function clearAnimalObject(id){
+        if(mAnimalObjects.get(id)){
+          document.body.removeChild(mAnimalObjects.get(id))
+        }
+      }
+
+
+      function updateAnimalObject(data){
+        // {animalType, userName, socketId, keyWordList}
+        clearAnimalObject(String(data.socketId))
+        var circle_div = document.createElement("div")
+        var animal_img = document.createElement("img")
+        var username_h3 = document.createElement("h3")
+        var keyword_h3 = document.createElement("h3")
+
+        var position_x = getRandomInt(0,screenWidth-ANIMAL_OBJECT_WIDTH)
+        var position_y = getRandomInt(0,screenHeight-ANIMAL_OBJECT_HEIGHT)
+
+        circle_div.id = String(data.socketId) + "_div"
+        //circle_div.style.padding = String(ANIMAL_OBJECT_PADDING) + "px"
+        circle_div.style.position = "fixed"
+        circle_div.style.width = String(ANIMAL_OBJECT_WIDTH) + "px"
+        circle_div.style.height = String(ANIMAL_OBJECT_HEIGHT) + "px"
+        circle_div.style.left = String(position_x) + "px"
+        circle_div.style.top = String(position_y) + "px"
+        circle_div.width = ANIMAL_OBJECT_WIDTH
+        circle_div.height = ANIMAL_OBJECT_HEIGHT
+        circle_div.style.borderRadius = "50%"
+        circle_div.style.backgroundColor = "rgba(245,233,188,1.0)"
+
+        animal_img.style.margin = String(ANIMAL_OBJECT_PADDING)+"px"
+        animal_img.style.position = "absolute"
+        animal_img.style.width = String(ANIMAL_IMAGE_WIDTH)
+        animal_img.style.height = String(ANIMAL_IMAGE_HEIGHT)
+        animal_img.width = ANIMAL_IMAGE_WIDTH
+        animal_img.height = ANIMAL_IMAGE_HEIGHT
+        animal_img.style.borderRadius = "50%"
+
+        username_h3.id = String(data.socketId) + "_username"
+        username_h3.style.margin = "0px"
+        username_h3.style.position = "absolute"
+        username_h3.style.textAlign = "center"
+        username_h3.style.left = "0px"
+        username_h3.style.top = "0px"
+        username_h3.style.width = "100%"
+        username_h3.style.color = "rgba(69,39,22,1)"
+        username_h3.style.textShadow = "1px 1px 1px #954c04"
+        username_h3.innerHTML = String(data.userName)
+
+        keyword_h3.id = String(data.socketId) + "_keyword"
+        keyword_h3.style.margin = "0px"
+        keyword_h3.style.position = "absolute"
+        keyword_h3.style.textAlign = "center"
+        keyword_h3.style.left = "0px"
+        keyword_h3.style.bottom = "0px"
+        keyword_h3.style.width = "100%"
+        keyword_h3.style.color = "rgba(69,39,22,1)"
+        keyword_h3.style.textShadow = "1px 1px 1px #954c04"
+        data.keywordList.forEach((val, ind, arr)=>{
+          if(keyword_h3.innerHTML.length + String(val).length + 1 < 16){
+            keyword_h3.innerHTML = keyword_h3.innerHTML + String(val) + " "
+          }
+        })
+
+        circle_div.appendChild(animal_img)
+        circle_div.appendChild(username_h3)
+        circle_div.appendChild(keyword_h3)
+
+
+        animal_img.onload = function(){
+
+          mAnimalObjects.set(String(data.socketId), circle_div)
+
+          document.body.appendChild(circle_div)
+
+          $("#"+String(data.socketId)+"_username").arctext({radius:ANIMAL_OBJECT_RADIUS,dir:1})
+          $("#"+String(data.socketId)+"_keyword").arctext({radius:ANIMAL_OBJECT_RADIUS,dir:-1})
+
+          flipAnimationStart(circle_div)
+
+        }
+
+        animal_img.src = "/images/" + data.animalType + ".png"
+      }
+
+      function changeTransparent(){
+        if(mFlgTransparent){
+          // toumei -> hutoumei
+          mAnimalObjects.forEach((value, key, map)=>{
+            value.className = ""
+            value.style.opacity = "1.0"
+          })
+          document.body.style.backgroundColor = "rgba(0,0,0,0.3)"
+        }else{
+          // hutoumei -> toumei
+          mAnimalObjects.forEach((value, key, map)=>{
+            value.className = ""
+            value.style.opacity = "0.0"
+          })
+           document.body.style.backgroundColor = "rgba(0,0,0,0.0)"
+
+        }
+        mFlgTransparent = !mFlgTransparent
+      }
+
+      function startVideoChat(){
+        //ipc message
+      }
+
+
+
+      //cutInAnimalImage("inu")
+      //updateAnimalObject({userName:"keisukekeisuke",socketId:"aaaaaa",keywordList:["aaaa","bbbb","cccc"],animalType:"inu"})
+    </script>
+
+</body>
+</html>
