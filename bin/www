@@ -114,8 +114,8 @@ io.sockets.on('connection', function(socket) {
 
   socket.on('start_chat',function(message){
       // roomName
-      // socket.to(message.socketId).emit("start_chat", message);
-      socket.broadcast.emit("start_chat",message)
+      socket.to(message.socketId).emit("start_chat", message);
+      //socket.broadcast.emit("start_chat",message)
   })
 
   /*
