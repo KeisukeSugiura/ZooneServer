@@ -37,6 +37,7 @@
 		#login_div {
 			background-color: white;
 			border-radius: 50%; 
+			padding: 30%;
 		}
 	</style>
 	<div class="container">
@@ -44,7 +45,7 @@
 			<div class="form-group label-floating" style="margin-top: 50%;">
 			  	<label class="control-label" id="userName_input" for="focusedInput1">input username</label>
 			  	<input class="form-control" id="focusedInput1" type="text">
-				<button class="btn btn-success" id="login_button">login</button>
+				<!-- <button class="btn btn-success" id="login_button">login</button> -->
 			</div>
 		</div>
 	</div>
@@ -64,14 +65,26 @@
       const {ipcRenderer} = nodeRequire('electron')
 
       const userName_input = document.getElementById("focusedInput1")
-		const login_button = document.getElementById("login_button")
-		login_button.addEventListener("click",()=>{
-			var username = userName_input.value
-			if(username.length == 0){
-				username = createUniqueId()
-			}
-			ipcRenderer.send("login",{userName:username})
-		})      
+		// const login_button = document.getElementById("login_button")
+		// login_button.addEventListener("click",()=>{
+		// 	var username = userName_input.value
+		// 	if(username.length == 0){
+		// 		username = createUniqueId()
+		// 	}
+		// 	ipcRenderer.send("login",{userName:username})
+		// })      
+
+		userName_input.addEventListener('keypress',(e)=>{
+			var key = e.which || e.keyCode;
+			    if (key === 13) { // 13 is enter
+			      // code for enter
+			      var username = userName_input.value
+					if(username.length == 0){
+						username = createUniqueId()
+					}
+					ipcRenderer.send("login",{userName:username})
+			    }
+		})
 
 	function createUniqueId(){
     	return Math.random().toString(36).slice(-8)
