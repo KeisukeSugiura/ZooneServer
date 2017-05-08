@@ -108,12 +108,14 @@ io.sockets.on('connection', function(socket) {
       // userName, keywordList, animalType 
       // add socketId
       message.socketId = socket.id;
+      console.log("shout_notification")
       socket.broadcast.emit("shout_notification",message);
   })
 
   socket.on('start_chat',function(message){
       // roomName
-      socket.to(message.socketId).emit("start_chat", message);
+      // socket.to(message.socketId).emit("start_chat", message);
+      socket.broadcast.emit("start_chat",message)
   })
 
   /*
