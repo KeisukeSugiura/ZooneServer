@@ -279,10 +279,6 @@
           circle_div.addEventListener('click',()=>{
               ipcRenderer.send('start_chat',{roomName:data.socketId,socketId:data.socketId})
           })
-          var timeout = function(){
-            clearAnimalObject(String(data.socketId))
-          }
-          setTimeout(timeout,10000000)
          
         }
 
