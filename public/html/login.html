@@ -49,6 +49,8 @@
 			<div class="form-group label-floating">
 			  	<label class="control-label" id="userName_input" for="focusedInput1">Welcome to zoone. Input your name.</label>
 			  	<input class="form-control" id="focusedInput1" type="text">
+			  	<label class="control-label" id="interest_input" for="focusedInput2">Input your Interest.</label>
+			  	<input class="form-control" id="focusedInput2" type="text">
 				<!-- <button class="btn btn-success" id="login_button">login</button> -->
 			</div>
 		</div>
@@ -69,6 +71,7 @@
       const {ipcRenderer} = nodeRequire('electron')
 
       const userName_input = document.getElementById("focusedInput1")
+      const interest_input = document.getElementById("focusedInput2")
 		// const login_button = document.getElementById("login_button")
 		// login_button.addEventListener("click",()=>{
 		// 	var username = userName_input.value
@@ -78,15 +81,16 @@
 		// 	ipcRenderer.send("login",{userName:username})
 		// })      
 
-		userName_input.addEventListener('keypress',(e)=>{
+		interest_input.addEventListener('keypress',(e)=>{
 			var key = e.which || e.keyCode;
 			    if (key === 13) { // 13 is enter
 			      // code for enter
 			      var username = userName_input.value
+			      var interest = interest_input.value
 					if(username.length == 0){
 						username = createUniqueId()
 					}
-					ipcRenderer.send("login",{userName:username})
+					ipcRenderer.send("login",{userName:username,interest:interest})
 			    }
 		})
 
